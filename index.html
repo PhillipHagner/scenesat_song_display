@@ -38,7 +38,7 @@
             margin-left: auto;
         }
 
-        #duration_label {
+        #time_label {
             font-size: 1em;
             margin-right: 2em;
         }
@@ -52,32 +52,44 @@
     <div id="song_container">
         <h1 id="title_label">Loading...</h1>
         <div id="row">
-            <h1 id="duration_label">Loading...</h1>
+            <h1 id="time_label">Loading...</h1>
             <h1 id="artist_label">Loading...</h1>
         </div>
     </div>
     <script type="text/javascript">
-        const title = document.getElementById("title_label");
-        const duration = document.getElementById("duration_label");
-        const artist = document.getElementById("artist_label");
+        const title_label = document.getElementById("title_label");
+        const time_label = document.getElementById("time_label");
+        const artist_label = document.getElementById("artist_label");
 
-        setInterval(update, 500);
+        let duration = 0;
+        let current = 0;
 
-        async function update() {
+        scrape();
+
+        async function scrape() {
             try {
                 let response = await fetch("https://scenesat.com/playing");
                 let data = await response.json();
 
-                let current = data.now - data.started;
+                title_label.innerText = data.title;
+                artist_label.innerText = data.artist;
 
-                title.innerText = data.title;
-                artist.innerText = data.artist;
-                duration.innerText = `[${secondsToMMSS(current)}/${secondsToMMSS(data.duration)}]`;
+                duration = data.duration;
+                current = data.now - data.started;
 
                 //console.log(data);
+
+                setTimeout(scrape, data.nextpoll * 1000);
             } catch (err) {
                 console.error("Error when fetching: ", err);
             }
+        }
+
+        setInterval(updateDuration, 1000);
+
+        function updateDuration() {
+            current += 1;
+            time_label.innerText = `[${secondsToMMSS(current)}/${secondsToMMSS(duration)}]`;
         }
 
         function secondsToMMSS(secs) {
