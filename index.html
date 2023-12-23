@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*" />
+    <title>Lixou's SceneSat Song Display</title>
+    <style>
+        @font-face {
+            font-family: 'Cozette';
+            src: URL('CozetteVector.ttf') format('truetype');
+        }
+
+        #song_container {
+            position: fixed;
+            right: 1em;
+            bottom: 1em;
+            padding: 4px 12px;
+            background-color: #00000099;
+            border-radius: 10px;
+            width: fit-content;
+        }
+
+        #row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        h1 {
+            font-family: 'Cozette', sans-serif;
+            width: fit-content;
+            color: white;
+            margin: 0;
+        }
+
+        #title_label {
+            text-align: right;
+            margin-left: auto;
+        }
+
+        #duration_label {
+            font-size: 1em;
+            margin-right: 2em;
+        }
+        
+        #artist_label {
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div id="song_container">
+        <h1 id="title_label">Loading...</h1>
+        <div id="row">
+            <h1 id="duration_label">Loading...</h1>
+            <h1 id="artist_label">Loading...</h1>
+        </div>
+    </div>
+    <script type="text/javascript">
+        const title = document.getElementById("title_label");
+        const duration = document.getElementById("duration_label");
+        const artist = document.getElementById("artist_label");
+
+        setInterval(update, 500);
+
+        async function update() {
+            try {
+                let response = await fetch("https://scenesat.com/playing");
+                let data = await response.json();
+
+                let current = data.now - data.started;
+
+                title.innerText = data.title;
+                artist.innerText = data.artist;
+                duration.innerText = `[${secondsToMMSS(current)}/${secondsToMMSS(data.duration)}]`;
+
+                //console.log(data);
+
+                return data.nextpoll;
+            } catch (err) {
+                console.error("Error when fetching: ", err);
+            }
+        }
+
+        function secondsToMMSS(secs) {
+            let d = new Date(secs * 1000);    
+            var minutes = d.getMinutes().toString().padStart(2, '0')    
+            var seconds = d.getSeconds().toString().padStart(2, '0')
+
+            return `${minutes}:${seconds}`
+        }
+    </script>
+</body>
+</html>
