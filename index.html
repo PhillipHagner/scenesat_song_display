@@ -68,7 +68,7 @@
 
         async function scrape() {
             try {
-                let response = await fetch("https://scenesat.com/playing");
+                let response = await fetch("https://scenesat.com/playdetails");
                 let data = await response.json();
 
                 title_label.innerText = data.title;
